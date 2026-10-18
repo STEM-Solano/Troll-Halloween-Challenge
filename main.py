@@ -28,7 +28,7 @@ def play_enemy_music(enemy_number):
     global current_music,music_transition
     if not AUDIO_AVAILABLE:
         return
-    filename=f"music/{enemy_number+1}.wav"
+    filename=f"music/{enemy_number+1}.ogg"
     if current_music==filename and music_transition is None:
         return
     music_path=os.path.join(os.path.dirname(os.path.abspath(__file__)),filename)
