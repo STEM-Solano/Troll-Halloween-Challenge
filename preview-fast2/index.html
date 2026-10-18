@@ -194,8 +194,8 @@ function show_infobox() {
     <title>trials-and-trolls-audio1</title>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="viewport" content="height=device-height, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes"/>
 
@@ -299,6 +299,18 @@ function show_infobox() {
 
     <script src="https://pygame-web.github.io/cdn/0.9.3//browserfs.min.js"></script>
 
+<style>
+html, body {width:100%;height:100%;overflow:hidden;overscroll-behavior:none;background:#000 !important;}
+#canvas {
+ position:fixed !important; inset:auto !important;
+ left:var(--game-left,0px) !important; top:var(--game-top,0px) !important;
+ width:var(--game-width,100vw) !important; height:var(--game-height,75vw) !important;
+ margin:0 !important; border:0 !important; padding:0 !important;
+ touch-action:manipulation;
+}
+#preview-controls {top:max(6px,env(safe-area-inset-top)) !important;right:max(6px,env(safe-area-inset-right)) !important;}
+</style>
+<script src="responsive.js?v=rotate1" defer></script>
 </head>
 
 <body>
