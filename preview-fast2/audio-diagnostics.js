@@ -2,8 +2,12 @@
 (() => {
  'use strict';
  const lines=['Preview audio1 · timings since navigation'];
- let output, player, soundButton, desired=0, enabled=false, fadeTimer, playGeneration=0;
- const updateButton=()=>{if(soundButton){soundButton.textContent=enabled?'Sound ON — Disable':'Sound OFF — Enable';soundButton.setAttribute('aria-pressed',String(enabled));}};
+ let output, player, soundButton, desired=0, enabled=false, fadeTimer, playGeneration=0, compactButton, controls, details;
+ const updateButton=()=>{
+  if(soundButton){soundButton.textContent=enabled?'Sound ON — Disable':'Sound OFF — Enable';soundButton.setAttribute('aria-pressed',String(enabled));}
+  if(compactButton){compactButton.textContent=(enabled?'🔊':'🔇')+' '+(controls.hidden?'▾':'▴');compactButton.setAttribute('aria-label','Sound '+(enabled?'on':'off')+' — '+(controls.hidden?'expand':'collapse')+' controls');}
+ };
+ const setExpanded=expanded=>{if(!controls)return;controls.hidden=!expanded;compactButton.setAttribute('aria-expanded',String(expanded));if(!expanded&&details)details.open=false;updateButton();};
  const seconds=()=> (performance.now()/1000).toFixed(2)+'s';
  const report=text=>{ lines.push(seconds()+' '+text);if(lines.length>40)lines.splice(1,1);if(output)output.textContent=lines.join('\n'); };
  const mark=(key,label)=>{report(label);if(key==='game')document.documentElement.dataset.previewReady='true';};
@@ -46,10 +50,15 @@
    enabled=!enabled;++playGeneration;updateButton();
    if(enabled){report('Sound enabled by tap');attempt(true);}
    else{clearInterval(fadeTimer);player.muted=true;player.pause();report('Sound disabled by tap');}
+   setExpanded(false);compactButton.focus();
   });
-  const details=document.createElement('details');const summary=document.createElement('summary');summary.textContent='Startup / sound details';
+  details=document.createElement('details');const summary=document.createElement('summary');summary.textContent='Startup / sound details';
   output=document.createElement('pre');output.id='preview-diagnostics';output.style.cssText='white-space:pre-wrap;max-height:36vh;overflow:auto;max-width:85vw';
-  details.append(summary,player,output);panel.append(soundButton,details);document.body.append(panel);output.textContent=lines.join('\n');report('Page controls ready');
+  controls=document.createElement('div');controls.id='sound-options';controls.hidden=true;
+  compactButton=document.createElement('button');compactButton.id='sound-panel-toggle';compactButton.setAttribute('aria-controls','sound-options');compactButton.setAttribute('aria-expanded','false');
+  compactButton.style.cssText='font:18px system-ui;padding:6px 10px;touch-action:manipulation';
+  compactButton.addEventListener('click',()=>setExpanded(controls.hidden));
+  details.append(summary,player,output);controls.append(soundButton,details);panel.append(compactButton,controls);document.body.append(panel);updateButton();output.textContent=lines.join('\n');report('Page controls ready');
   new PerformanceObserver(list=>{for(const e of list.getEntries()){if(e.name.includes('.tar.gz'))report('Archive '+(e.duration/1000).toFixed(2)+'s, '+e.transferSize+' network bytes');if(e.name.includes('/cpython312/')&&e.name.endsWith('.wasm'))report('Python runtime download '+(e.duration/1000).toFixed(2)+'s');}}).observe({type:'resource',buffered:true});
  });
  addEventListener('error',e=>report('Page error: '+e.message));
