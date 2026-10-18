@@ -6,7 +6,9 @@
   const viewport=window.visualViewport;
   const width=viewport?viewport.width:innerWidth;
   const height=viewport?viewport.height:innerHeight;
-  const inset=getComputedStyle(document.getElementById('safe-area-probe'));
+  const probe=document.getElementById('safe-area-probe');
+  if(!probe)return;
+  const inset=getComputedStyle(probe);
   const left=parseFloat(inset.paddingLeft)||0,right=parseFloat(inset.paddingRight)||0;
   const top=parseFloat(inset.paddingTop)||0,bottom=parseFloat(inset.paddingBottom)||0;
   const availableWidth=Math.max(1,width-left-right),availableHeight=Math.max(1,height-top-bottom);
