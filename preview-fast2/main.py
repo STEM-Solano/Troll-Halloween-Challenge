@@ -420,7 +420,7 @@ answer_feedback=None
 answer_feedback_deadline=0
 answer_feedback_elapsed=0
 answer_selected_index=-1
-ANSWER_FEEDBACK_MS=2000
+ANSWER_FEEDBACK_MS=1000
 QUESTION_TIME_LIMIT=10
 attack_cooldowns={"Swing":0,"Spin":0,"Smash":0,"Headbutt":0,"Heal":0}
 def draw_text(text,x,y,color=WHITE,size="normal"):
@@ -518,7 +518,7 @@ def draw_question():
     remaining=max(0,QUESTION_TIME_LIMIT-elapsed)
     timer_color=RED if remaining<=3 else YELLOW
     draw_text(f"TIME: {remaining:.1f}",330,165,timer_color,"small")
-    if selected_grade==12 and not question_locked:
+    if not question_locked:
         pause_button.text="Resume" if question_paused else "Pause"
         pause_button.draw()
         if question_paused:
@@ -628,7 +628,7 @@ def question_elapsed_ms():
 
 def toggle_question_pause():
     global question_paused,question_pause_started,question_start_time
-    if selected_grade!=12 or game_state!="QUESTION" or question_locked:
+    if game_state!="QUESTION" or question_locked:
         return False
     if question_paused:
         question_start_time+=pygame.time.get_ticks()-question_pause_started
@@ -877,7 +877,7 @@ async def main():
                         else:
                             next_enemy()
             elif game_state=="QUESTION":
-                if selected_grade==12 and pause_button.clicked(event):
+                if pause_button.clicked(event):
                     toggle_question_pause()
                 elif not question_locked and not question_paused:
                     for i,button in enumerate(answer_buttons):
