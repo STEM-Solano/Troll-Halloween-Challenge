@@ -12,7 +12,9 @@
   const left=parseFloat(inset.paddingLeft)||0,right=parseFloat(inset.paddingRight)||0;
   const top=parseFloat(inset.paddingTop)||0,bottom=parseFloat(inset.paddingBottom)||0;
   const availableWidth=Math.max(1,width-left-right),availableHeight=Math.max(1,height-top-bottom);
-  const gameWidth=Math.min(availableWidth,availableHeight*4/3),gameHeight=gameWidth*3/4;
+  const fillViewport=window.matchMedia('(pointer: coarse)').matches || Math.min(width,height)<=600;
+  const gameWidth=fillViewport?availableWidth:Math.min(availableWidth,availableHeight*4/3);
+  const gameHeight=fillViewport?availableHeight:gameWidth*3/4;
   const values={
    '--game-width':gameWidth+'px','--game-height':gameHeight+'px',
    '--game-left':((viewport?viewport.offsetLeft:0)+left+(availableWidth-gameWidth)/2)+'px',
@@ -20,7 +22,7 @@
   };
   for(const [name,value] of Object.entries(values))document.documentElement.style.setProperty(name,value);
   const layout=Math.round(width)+'×'+Math.round(height)+' → '+Math.round(gameWidth)+'×'+Math.round(gameHeight);
-  if(layout!==lastLayout){lastLayout=layout;window.trollDiag?.mark('layout','Screen '+layout);}
+  if(layout!==lastLayout){lastLayout=layout;window.trollDiag?.mark('layout','Screen '+layout+(fillViewport?' · fill':' · fit'));}
  }
  function schedule(){if(!scheduled){scheduled=true;requestAnimationFrame(fit);}}
  addEventListener('DOMContentLoaded',()=>{
