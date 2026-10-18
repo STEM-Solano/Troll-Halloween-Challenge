@@ -413,6 +413,9 @@ selected_attack=""
 question_message=""
 question_locked=False
 question_start_time=0
+question_paused=False
+question_pause_started=0
+pause_button=Button(25,25,145,48,"Pause")
 QUESTION_TIME_LIMIT=10
 attack_cooldowns={"Swing":0,"Spin":0,"Smash":0,"Headbutt":0,"Heal":0}
 def draw_text(text,x,y,color=WHITE,size="normal"):
@@ -506,10 +509,15 @@ def draw_question():
     draw_text("KNOWLEDGE TRIAL",235,40,PURPLE,"large")
     draw_text(f"GRADE {selected_grade} MATH TRIAL",255,105,YELLOW,"small")
     draw_text(f"Attack: {selected_attack}",300,135,WHITE,"small")
-    elapsed=(pygame.time.get_ticks()-question_start_time)/1000
+    elapsed=question_elapsed_ms()/1000
     remaining=max(0,QUESTION_TIME_LIMIT-elapsed)
     timer_color=RED if remaining<=3 else YELLOW
     draw_text(f"TIME: {remaining:.1f}",330,165,timer_color,"small")
+    if selected_grade==12:
+        pause_button.text="Resume" if question_paused else "Pause"
+        pause_button.draw()
+        if question_paused:
+            draw_text("PAUSED — timer stopped. Resume to answer.",100,310,YELLOW,"small")
     draw_text(question,100,205)
     draw_text("Correct: you attack first. Surviving enemies hit back!",100,265,GREEN,"small")
     for i,button in enumerate(answer_buttons):
@@ -569,7 +577,7 @@ def get_question_difficulty(attack):
     if attack=="Smash":
         return "very_hard"
 def create_question(subject,attack):
-    global question,question_choices,question_answer,question_subject,question_message,question_locked,question_start_time
+    global question,question_choices,question_answer,question_subject,question_message,question_locked,question_start_time,question_paused,question_pause_started
     question_subject=subject
     difficulty=get_question_difficulty(attack)
     question,choices,correct_index=random.choice(get_questions(difficulty,subject))
@@ -579,6 +587,8 @@ def create_question(subject,attack):
     question_answer=question_choices.index(correct_answer)
     question_message=""
     question_locked=False
+    question_paused=False
+    question_pause_started=0
     question_start_time=pygame.time.get_ticks()
 def start_attack(move):
     global selected_attack,game_state
@@ -598,11 +608,31 @@ def enemy_counterattack():
         winner="SLIME"
         game_state="GAMEOVER"
         message=f"The {slime.name} defeated you..."
+def question_elapsed_ms():
+    now=question_pause_started if question_paused else pygame.time.get_ticks()
+    return max(0,now-question_start_time)
+
+def toggle_question_pause():
+    global question_paused,question_pause_started,question_start_time
+    if selected_grade!=12 or game_state!="QUESTION" or question_locked:
+        return False
+    if question_paused:
+        question_start_time+=pygame.time.get_ticks()-question_pause_started
+        question_paused=False
+        question_pause_started=0
+    else:
+        # An expired question cannot be rescued by pausing after the deadline.
+        if question_time_expired():
+            return False
+        question_pause_started=pygame.time.get_ticks()
+        question_paused=True
+    return True
+
 def question_time_expired():
-    return (pygame.time.get_ticks()-question_start_time)>=QUESTION_TIME_LIMIT*1000
+    return not question_paused and question_elapsed_ms()>=QUESTION_TIME_LIMIT*1000
 def answer_question(index):
     global question_message,question_locked,game_state,message
-    if question_locked:
+    if question_locked or question_paused:
         return
     if question_time_expired():
         question_locked=True
@@ -812,7 +842,9 @@ async def main():
                         else:
                             next_enemy()
             elif game_state=="QUESTION":
-                if not question_locked:
+                if selected_grade==12 and pause_button.clicked(event):
+                    toggle_question_pause()
+                elif not question_locked and not question_paused:
                     for i,button in enumerate(answer_buttons):
                         if button.clicked(event):
                             answer_question(i)
