@@ -5,6 +5,11 @@ import random
 import os
 from fractions import Fraction
 pygame.init()
+WEB_MUSIC = None
+if sys.platform == "emscripten":
+    import platform
+    WEB_MUSIC = platform.window.trollAudio
+
 # iOS may not expose audio until the first user interaction.
 try:
     if not pygame.mixer.get_init():
@@ -26,9 +31,12 @@ MUSIC_VOLUME=0.5
 MUSIC_FADE_MS=1200
 def play_enemy_music(enemy_number):
     global current_music,music_transition
+    if WEB_MUSIC is not None:
+        WEB_MUSIC.play(enemy_number)
+        return
     if not AUDIO_AVAILABLE:
         return
-    filename=f"music/{enemy_number+1}.wav"
+    filename=f"music/{enemy_number+1}.ogg"
     if current_music==filename and music_transition is None:
         return
     music_path=os.path.join(os.path.dirname(os.path.abspath(__file__)),filename)
@@ -82,6 +90,8 @@ def update_music_transition():
             music_transition=None
 def stop_music():
     global current_music,music_transition
+    if WEB_MUSIC is not None:
+        WEB_MUSIC.stop()
     if music_channel is not None:
         music_channel.stop()
     current_music=None
@@ -403,6 +413,14 @@ selected_attack=""
 question_message=""
 question_locked=False
 question_start_time=0
+question_paused=False
+question_pause_started=0
+pause_button=Button(25,25,145,48,"Pause")
+answer_feedback=None
+answer_feedback_deadline=0
+answer_feedback_elapsed=0
+answer_selected_index=-1
+ANSWER_FEEDBACK_MS=1000
 QUESTION_TIME_LIMIT=10
 attack_cooldowns={"Swing":0,"Spin":0,"Smash":0,"Headbutt":0,"Heal":0}
 def draw_text(text,x,y,color=WHITE,size="normal"):
@@ -496,17 +514,30 @@ def draw_question():
     draw_text("KNOWLEDGE TRIAL",235,40,PURPLE,"large")
     draw_text(f"GRADE {selected_grade} MATH TRIAL",255,105,YELLOW,"small")
     draw_text(f"Attack: {selected_attack}",300,135,WHITE,"small")
-    elapsed=(pygame.time.get_ticks()-question_start_time)/1000
+    elapsed=(answer_feedback_elapsed if answer_feedback is not None else question_elapsed_ms())/1000
     remaining=max(0,QUESTION_TIME_LIMIT-elapsed)
     timer_color=RED if remaining<=3 else YELLOW
     draw_text(f"TIME: {remaining:.1f}",330,165,timer_color,"small")
+    if not question_locked:
+        pause_button.text="Resume" if question_paused else "Pause"
+        pause_button.draw()
+        if question_paused:
+            draw_text("PAUSED — timer stopped. Resume to answer.",100,310,YELLOW,"small")
     draw_text(question,100,205)
     draw_text("Correct: you attack first. Surviving enemies hit back!",100,265,GREEN,"small")
     for i,button in enumerate(answer_buttons):
         button.text=question_choices[i]
         button.draw()
+        if answer_feedback is not None:
+            if i==question_answer:
+                pygame.draw.rect(screen,GREEN,button.rect,6)
     if question_message:
-        draw_text(question_message,180,540,YELLOW,"small")
+        feedback_font=small_font
+        surface=feedback_font.render(question_message,True,YELLOW)
+        if surface.get_width()>740:
+            feedback_font=pygame.font.Font(None,max(16,int(30*740/surface.get_width())))
+            surface=feedback_font.render(question_message,True,YELLOW)
+        screen.blit(surface,surface.get_rect(center=(400,550)))
 def draw_levelup():
     screen.fill(BLACK)
     draw_text("LEVEL UP!",280,50,YELLOW,"large")
@@ -559,7 +590,7 @@ def get_question_difficulty(attack):
     if attack=="Smash":
         return "very_hard"
 def create_question(subject,attack):
-    global question,question_choices,question_answer,question_subject,question_message,question_locked,question_start_time
+    global question,question_choices,question_answer,question_subject,question_message,question_locked,question_start_time,question_paused,question_pause_started,answer_feedback
     question_subject=subject
     difficulty=get_question_difficulty(attack)
     question,choices,correct_index=random.choice(get_questions(difficulty,subject))
@@ -569,6 +600,9 @@ def create_question(subject,attack):
     question_answer=question_choices.index(correct_answer)
     question_message=""
     question_locked=False
+    answer_feedback=None
+    question_paused=False
+    question_pause_started=0
     question_start_time=pygame.time.get_ticks()
 def start_attack(move):
     global selected_attack,game_state
@@ -588,13 +622,54 @@ def enemy_counterattack():
         winner="SLIME"
         game_state="GAMEOVER"
         message=f"The {slime.name} defeated you..."
+def question_elapsed_ms():
+    now=question_pause_started if question_paused else pygame.time.get_ticks()
+    return max(0,now-question_start_time)
+
+def toggle_question_pause():
+    global question_paused,question_pause_started,question_start_time
+    if game_state!="QUESTION" or question_locked:
+        return False
+    if question_paused:
+        question_start_time+=pygame.time.get_ticks()-question_pause_started
+        question_paused=False
+        question_pause_started=0
+    else:
+        # An expired question cannot be rescued by pausing after the deadline.
+        if question_time_expired():
+            return False
+        question_pause_started=pygame.time.get_ticks()
+        question_paused=True
+    return True
+
 def question_time_expired():
-    return (pygame.time.get_ticks()-question_start_time)>=QUESTION_TIME_LIMIT*1000
+    return not question_paused and question_elapsed_ms()>=QUESTION_TIME_LIMIT*1000
 def answer_question(index):
-    global question_message,question_locked,game_state,message
-    if question_locked:
+    global question_locked,question_message,answer_feedback,answer_feedback_deadline,answer_feedback_elapsed,answer_selected_index
+    if question_locked or question_paused or game_state!="QUESTION":
         return
-    if question_time_expired():
+    timed_out=question_time_expired()
+    answer_feedback_elapsed=question_elapsed_ms()
+    answer_selected_index=index
+    answer_feedback=(index,timed_out)
+    answer_feedback_deadline=pygame.time.get_ticks()+ANSWER_FEEDBACK_MS
+    question_message=""
+    question_locked=True
+
+def update_answer_feedback():
+    global answer_feedback,question_locked
+    if answer_feedback is None or pygame.time.get_ticks()<answer_feedback_deadline:
+        return
+    index,timed_out=answer_feedback
+    answer_feedback=None
+    question_locked=False
+    resolve_question(index,timed_out)
+
+def resolve_question(index,timed_out):
+    global question_message,question_locked,game_state,message
+    if question_locked or question_paused:
+        return
+    if timed_out:
         question_locked=True
         player.wrong+=1
         player.mastery[question_subject]=max(0,player.mastery[question_subject]-1)
@@ -655,6 +730,8 @@ def next_enemy():
         global game_state
         game_state="GAMEOVER"
         return
+    if WEB_MUSIC is not None:
+        WEB_MUSIC.fadeOut()
     # Fade the current soundtrack and the current screen to black together.
     encounter_transition={"phase":"out","start_time":pygame.time.get_ticks()}
 def load_next_enemy():
@@ -800,7 +877,9 @@ async def main():
                         else:
                             next_enemy()
             elif game_state=="QUESTION":
-                if not question_locked:
+                if pause_button.clicked(event):
+                    toggle_question_pause()
+                elif not question_locked and not question_paused:
                     for i,button in enumerate(answer_buttons):
                         if button.clicked(event):
                             answer_question(i)
@@ -822,6 +901,7 @@ async def main():
                     restart_game()
         if game_state=="QUESTION" and not question_locked and question_time_expired():
             answer_question(-1)
+        update_answer_feedback()
         update_music_transition()
         update_encounter_transition()
         if game_state=="TITLE":
