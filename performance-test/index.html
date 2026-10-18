@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Trials and Trolls performance comparison</title>
+<style>body{font:16px system-ui;margin:20px;background:#edf1f6;color:#16243a}button{font:inherit;padding:12px}table{border-collapse:collapse;background:white;margin:14px 0}td,th{padding:8px 12px;border:1px solid #cdd4df}iframe{width:800px;height:600px;border:0}pre{white-space:pre-wrap}</style></head><body>
+<h1>Startup performance comparison</h1><p>Same Chrome browser and network. Fresh package uses a unique URL; Python engine cache is retained. Repeat visit reuses that package URL. Service-worker registration disabled in these instrumented copies; HTTP caching remains enabled.</p>
+<button id="start">Run 5 paired comparisons</button><p id="status">Ready</p>
+<table><thead><tr><th>Run</th><th>Version</th><th>Visit</th><th>Startup seconds</th><th>Archive transfer bytes</th><th>Archive download ms</th><th>Endpoint</th></tr></thead><tbody id="rows"></tbody></table>
+<pre id="summary"></pre><iframe id="game" allow="autoplay"></iframe><pre id="raw"></pre>
+<script>
+const results=[];const queue=[];let active=null,timer=null;const token=Date.now();
+for(let i=1;i<=5;i++){for(const version of i%2?['original','optimized']:['optimized','original']){const sample='?sample='+token+'-'+i+'-'+version;queue.push({run:i,version,visit:'fresh-package',sample},{run:i,version,visit:'repeat',sample});}}
+const status=document.querySelector('#status');
+function median(a){a=[...a].sort((x,y)=>x-y);return a[Math.floor(a.length/2)];}
+function next(){
+ if(!queue.length){status.textContent='Complete: '+results.length+' / 20 successful starts';const summary=[];for(const visit of ['fresh-package','repeat'])for(const version of ['original','optimized']){const a=results.filter(r=>r.visit===visit&&r.version===version);summary.push({visit,version,n:a.length,medianStartupSeconds:median(a.map(r=>r.seconds)),medianTransferBytes:median(a.map(r=>r.bytes)),medianArchiveMs:median(a.map(r=>r.downloadMs))});}document.querySelector('#summary').textContent=JSON.stringify(summary,null,2);document.querySelector('#raw').textContent=JSON.stringify(results,null,2);return;}
+ active=queue.shift();status.textContent='Testing '+active.version+' '+active.visit+' run '+active.run;
+ document.querySelector('#game').src=active.version+'.html'+active.sample;
+ timer=setTimeout(()=>{status.textContent='FAILED: startup timeout '+JSON.stringify(active);document.querySelector('#raw').textContent=JSON.stringify(results,null,2);},60000);
+}
+addEventListener('message',e=>{if(e.origin!==location.origin||e.source!==document.querySelector('#game').contentWindow||e.data.type!=='troll-benchmark'||e.data.sample!==active?.sample)return;clearTimeout(timer);const r={...active,...e.data};r.bytes=r.archive.reduce((a,e)=>a+e.transferSize,0);r.downloadMs=Math.max(0,...r.archive.map(e=>e.durationMs));results.push(r);const tr=document.createElement('tr');for(const v of [r.run,r.version,r.visit,r.seconds.toFixed(3),r.bytes,r.downloadMs.toFixed(1),r.endpoint]){const td=document.createElement('td');td.textContent=v;tr.append(td);}document.querySelector('#rows').append(tr);active=null;setTimeout(next,150);});
+document.querySelector('#start').onclick=e=>{e.target.disabled=true;next();};
+</script></body></html>
