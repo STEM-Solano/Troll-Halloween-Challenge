@@ -531,8 +531,6 @@ def draw_question():
         if answer_feedback is not None:
             if i==question_answer:
                 pygame.draw.rect(screen,GREEN,button.rect,6)
-            elif i==answer_selected_index:
-                pygame.draw.rect(screen,RED,button.rect,6)
     if question_message:
         feedback_font=small_font
         surface=feedback_font.render(question_message,True,YELLOW)
@@ -540,9 +538,6 @@ def draw_question():
             feedback_font=pygame.font.Font(None,max(16,int(30*740/surface.get_width())))
             surface=feedback_font.render(question_message,True,YELLOW)
         screen.blit(surface,surface.get_rect(center=(400,550)))
-    if answer_feedback is not None:
-        outcome="Time's up" if answer_feedback[1] else ("Correct!" if answer_selected_index==question_answer else "Incorrect")
-        draw_text(outcome+" — continuing in 2 seconds",100,310,YELLOW,"small")
 def draw_levelup():
     screen.fill(BLACK)
     draw_text("LEVEL UP!",280,50,YELLOW,"large")
@@ -658,7 +653,7 @@ def answer_question(index):
     answer_selected_index=index
     answer_feedback=(index,timed_out)
     answer_feedback_deadline=pygame.time.get_ticks()+ANSWER_FEEDBACK_MS
-    question_message=f"Correct answer: {question_choices[question_answer]}"
+    question_message=""
     question_locked=True
 
 def update_answer_feedback():
