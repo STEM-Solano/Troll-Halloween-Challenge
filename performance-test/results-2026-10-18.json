@@ -1,0 +1,479 @@
+{
+  "method": "20 runs, 5 per version per condition; retained engine cache; unique archive query for fresh package, same URL for repeat; service-worker registration disabled in instrumented copies; endpoint loader ready plus two animation frames",
+  "summary": [
+    {
+      "visit": "fresh-package",
+      "version": "original",
+      "n": 5,
+      "medianStartupSeconds": 8.764,
+      "medianTransferBytes": 15440199,
+      "medianArchiveMs": 5723.899999999907
+    },
+    {
+      "visit": "fresh-package",
+      "version": "optimized",
+      "n": 5,
+      "medianStartupSeconds": 2.748299999999814,
+      "medianTransferBytes": 1195750,
+      "medianArchiveMs": 350.30000000004657
+    },
+    {
+      "visit": "repeat",
+      "version": "original",
+      "n": 5,
+      "medianStartupSeconds": 2.532600000000093,
+      "medianTransferBytes": 0,
+      "medianArchiveMs": 25.5
+    },
+    {
+      "visit": "repeat",
+      "version": "optimized",
+      "n": 5,
+      "medianStartupSeconds": 2.4515,
+      "medianTransferBytes": 0,
+      "medianArchiveMs": 14.600000000093132
+    }
+  ],
+  "runs": [
+    {
+      "run": 1,
+      "version": "original",
+      "visit": "fresh-package",
+      "sample": "?sample=1792343029176-1-original",
+      "type": "troll-benchmark",
+      "seconds": 8.9555,
+      "endpoint": "game-started",
+      "archive": [
+        {
+          "durationMs": 3948,
+          "transferSize": 15440199,
+          "encodedBodySize": 15439899,
+          "decodedBodySize": 15439899
+        }
+      ],
+      "bytes": 15440199,
+      "downloadMs": 3948
+    },
+    {
+      "run": 1,
+      "version": "original",
+      "visit": "repeat",
+      "sample": "?sample=1792343029176-1-original",
+      "type": "troll-benchmark",
+      "seconds": 2.5165,
+      "endpoint": "game-started",
+      "archive": [
+        {
+          "durationMs": 28.399999999906868,
+          "transferSize": 0,
+          "encodedBodySize": 15439899,
+          "decodedBodySize": 15439899
+        }
+      ],
+      "bytes": 0,
+      "downloadMs": 28.399999999906868
+    },
+    {
+      "run": 1,
+      "version": "optimized",
+      "visit": "fresh-package",
+      "sample": "?sample=1792343029176-1-optimized",
+      "type": "troll-benchmark",
+      "seconds": 2.952100000000093,
+      "endpoint": "game-started",
+      "archive": [
+        {
+          "durationMs": 756.4000000001397,
+          "transferSize": 1195750,
+          "encodedBodySize": 1195450,
+          "decodedBodySize": 1195450
+        },
+        {
+          "durationMs": 6.699999999953434,
+          "transferSize": 0,
+          "encodedBodySize": 1195450,
+          "decodedBodySize": 1195450
+        }
+      ],
+      "bytes": 1195750,
+      "downloadMs": 756.4000000001397
+    },
+    {
+      "run": 1,
+      "version": "optimized",
+      "visit": "repeat",
+      "sample": "?sample=1792343029176-1-optimized",
+      "type": "troll-benchmark",
+      "seconds": 2.2953000000000467,
+      "endpoint": "game-started",
+      "archive": [
+        {
+          "durationMs": 12.5,
+          "transferSize": 0,
+          "encodedBodySize": 1195450,
+          "decodedBodySize": 1195450
+        },
+        {
+          "durationMs": 4.899999999906868,
+          "transferSize": 0,
+          "encodedBodySize": 1195450,
+          "decodedBodySize": 1195450
+        }
+      ],
+      "bytes": 0,
+      "downloadMs": 12.5
+    },
+    {
+      "run": 2,
+      "version": "optimized",
+      "visit": "fresh-package",
+      "sample": "?sample=1792343029176-2-optimized",
+      "type": "troll-benchmark",
+      "seconds": 2.49559999999986,
+      "endpoint": "game-started",
+      "archive": [
+        {
+          "durationMs": 280.5,
+          "transferSize": 1195750,
+          "encodedBodySize": 1195450,
+          "decodedBodySize": 1195450
+        },
+        {
+          "durationMs": 5.2999999998137355,
+          "transferSize": 0,
+          "encodedBodySize": 1195450,
+          "decodedBodySize": 1195450
+        }
+      ],
+      "bytes": 1195750,
+      "downloadMs": 280.5
+    },
+    {
+      "run": 2,
+      "version": "optimized",
+      "visit": "repeat",
+      "sample": "?sample=1792343029176-2-optimized",
+      "type": "troll-benchmark",
+      "seconds": 2.4515,
+      "endpoint": "game-started",
+      "archive": [
+        {
+          "durationMs": 12.899999999906868,
+          "transferSize": 0,
+          "encodedBodySize": 1195450,
+          "decodedBodySize": 1195450
+        },
+        {
+          "durationMs": 6.099999999860302,
+          "transferSize": 0,
+          "encodedBodySize": 1195450,
+          "decodedBodySize": 1195450
+        }
+      ],
+      "bytes": 0,
+      "downloadMs": 12.899999999906868
+    },
+    {
+      "run": 2,
+      "version": "original",
+      "visit": "fresh-package",
+      "sample": "?sample=1792343029176-2-original",
+      "type": "troll-benchmark",
+      "seconds": 5.524699999999953,
+      "endpoint": "game-started",
+      "archive": [
+        {
+          "durationMs": 3015.4000000001397,
+          "transferSize": 15440199,
+          "encodedBodySize": 15439899,
+          "decodedBodySize": 15439899
+        }
+      ],
+      "bytes": 15440199,
+      "downloadMs": 3015.4000000001397
+    },
+    {
+      "run": 2,
+      "version": "original",
+      "visit": "repeat",
+      "sample": "?sample=1792343029176-2-original",
+      "type": "troll-benchmark",
+      "seconds": 3.920600000000093,
+      "endpoint": "game-started",
+      "archive": [
+        {
+          "durationMs": 25.5,
+          "transferSize": 0,
+          "encodedBodySize": 15439899,
+          "decodedBodySize": 15439899
+        }
+      ],
+      "bytes": 0,
+      "downloadMs": 25.5
+    },
+    {
+      "run": 3,
+      "version": "original",
+      "visit": "fresh-package",
+      "sample": "?sample=1792343029176-3-original",
+      "type": "troll-benchmark",
+      "seconds": 9.3065,
+      "endpoint": "game-started",
+      "archive": [
+        {
+          "durationMs": 5723.899999999907,
+          "transferSize": 15440199,
+          "encodedBodySize": 15439899,
+          "decodedBodySize": 15439899
+        }
+      ],
+      "bytes": 15440199,
+      "downloadMs": 5723.899999999907
+    },
+    {
+      "run": 3,
+      "version": "original",
+      "visit": "repeat",
+      "sample": "?sample=1792343029176-3-original",
+      "type": "troll-benchmark",
+      "seconds": 2.532600000000093,
+      "endpoint": "game-started",
+      "archive": [
+        {
+          "durationMs": 24,
+          "transferSize": 0,
+          "encodedBodySize": 15439899,
+          "decodedBodySize": 15439899
+        }
+      ],
+      "bytes": 0,
+      "downloadMs": 24
+    },
+    {
+      "run": 3,
+      "version": "optimized",
+      "visit": "fresh-package",
+      "sample": "?sample=1792343029176-3-optimized",
+      "type": "troll-benchmark",
+      "seconds": 2.697100000000093,
+      "endpoint": "game-started",
+      "archive": [
+        {
+          "durationMs": 441.60000000009313,
+          "transferSize": 1195750,
+          "encodedBodySize": 1195450,
+          "decodedBodySize": 1195450
+        },
+        {
+          "durationMs": 5.300000000046566,
+          "transferSize": 0,
+          "encodedBodySize": 1195450,
+          "decodedBodySize": 1195450
+        }
+      ],
+      "bytes": 1195750,
+      "downloadMs": 441.60000000009313
+    },
+    {
+      "run": 3,
+      "version": "optimized",
+      "visit": "repeat",
+      "sample": "?sample=1792343029176-3-optimized",
+      "type": "troll-benchmark",
+      "seconds": 2.335100000000093,
+      "endpoint": "game-started",
+      "archive": [
+        {
+          "durationMs": 20.300000000046566,
+          "transferSize": 0,
+          "encodedBodySize": 1195450,
+          "decodedBodySize": 1195450
+        },
+        {
+          "durationMs": 6,
+          "transferSize": 0,
+          "encodedBodySize": 1195450,
+          "decodedBodySize": 1195450
+        }
+      ],
+      "bytes": 0,
+      "downloadMs": 20.300000000046566
+    },
+    {
+      "run": 4,
+      "version": "optimized",
+      "visit": "fresh-package",
+      "sample": "?sample=1792343029176-4-optimized",
+      "type": "troll-benchmark",
+      "seconds": 2.8838000000000465,
+      "endpoint": "game-started",
+      "archive": [
+        {
+          "durationMs": 350.30000000004657,
+          "transferSize": 1195750,
+          "encodedBodySize": 1195450,
+          "decodedBodySize": 1195450
+        },
+        {
+          "durationMs": 6.2999999998137355,
+          "transferSize": 0,
+          "encodedBodySize": 1195450,
+          "decodedBodySize": 1195450
+        }
+      ],
+      "bytes": 1195750,
+      "downloadMs": 350.30000000004657
+    },
+    {
+      "run": 4,
+      "version": "optimized",
+      "visit": "repeat",
+      "sample": "?sample=1792343029176-4-optimized",
+      "type": "troll-benchmark",
+      "seconds": 2.5265999999998603,
+      "endpoint": "game-started",
+      "archive": [
+        {
+          "durationMs": 21.5,
+          "transferSize": 0,
+          "encodedBodySize": 1195450,
+          "decodedBodySize": 1195450
+        },
+        {
+          "durationMs": 16.799999999813735,
+          "transferSize": 0,
+          "encodedBodySize": 1195450,
+          "decodedBodySize": 1195450
+        }
+      ],
+      "bytes": 0,
+      "downloadMs": 21.5
+    },
+    {
+      "run": 4,
+      "version": "original",
+      "visit": "fresh-package",
+      "sample": "?sample=1792343029176-4-original",
+      "type": "troll-benchmark",
+      "seconds": 8.764,
+      "endpoint": "game-started",
+      "archive": [
+        {
+          "durationMs": 6149.200000000186,
+          "transferSize": 15440199,
+          "encodedBodySize": 15439899,
+          "decodedBodySize": 15439899
+        }
+      ],
+      "bytes": 15440199,
+      "downloadMs": 6149.200000000186
+    },
+    {
+      "run": 4,
+      "version": "original",
+      "visit": "repeat",
+      "sample": "?sample=1792343029176-4-original",
+      "type": "troll-benchmark",
+      "seconds": 2.4540999999998605,
+      "endpoint": "game-started",
+      "archive": [
+        {
+          "durationMs": 25.699999999953434,
+          "transferSize": 0,
+          "encodedBodySize": 15439899,
+          "decodedBodySize": 15439899
+        }
+      ],
+      "bytes": 0,
+      "downloadMs": 25.699999999953434
+    },
+    {
+      "run": 5,
+      "version": "original",
+      "visit": "fresh-package",
+      "sample": "?sample=1792343029176-5-original",
+      "type": "troll-benchmark",
+      "seconds": 8.643,
+      "endpoint": "game-started",
+      "archive": [
+        {
+          "durationMs": 6088.799999999814,
+          "transferSize": 15440199,
+          "encodedBodySize": 15439899,
+          "decodedBodySize": 15439899
+        }
+      ],
+      "bytes": 15440199,
+      "downloadMs": 6088.799999999814
+    },
+    {
+      "run": 5,
+      "version": "original",
+      "visit": "repeat",
+      "sample": "?sample=1792343029176-5-original",
+      "type": "troll-benchmark",
+      "seconds": 2.6411999999999534,
+      "endpoint": "game-started",
+      "archive": [
+        {
+          "durationMs": 23.600000000093132,
+          "transferSize": 0,
+          "encodedBodySize": 15439899,
+          "decodedBodySize": 15439899
+        }
+      ],
+      "bytes": 0,
+      "downloadMs": 23.600000000093132
+    },
+    {
+      "run": 5,
+      "version": "optimized",
+      "visit": "fresh-package",
+      "sample": "?sample=1792343029176-5-optimized",
+      "type": "troll-benchmark",
+      "seconds": 2.748299999999814,
+      "endpoint": "game-started",
+      "archive": [
+        {
+          "durationMs": 191.5,
+          "transferSize": 1195750,
+          "encodedBodySize": 1195450,
+          "decodedBodySize": 1195450
+        },
+        {
+          "durationMs": 9.599999999860302,
+          "transferSize": 0,
+          "encodedBodySize": 1195450,
+          "decodedBodySize": 1195450
+        }
+      ],
+      "bytes": 1195750,
+      "downloadMs": 191.5
+    },
+    {
+      "run": 5,
+      "version": "optimized",
+      "visit": "repeat",
+      "sample": "?sample=1792343029176-5-optimized",
+      "type": "troll-benchmark",
+      "seconds": 2.531299999999814,
+      "endpoint": "game-started",
+      "archive": [
+        {
+          "durationMs": 14.600000000093132,
+          "transferSize": 0,
+          "encodedBodySize": 1195450,
+          "decodedBodySize": 1195450
+        },
+        {
+          "durationMs": 4.600000000093132,
+          "transferSize": 0,
+          "encodedBodySize": 1195450,
+          "decodedBodySize": 1195450
+        }
+      ],
+      "bytes": 0,
+      "downloadMs": 14.600000000093132
+    }
+  ]
+}
