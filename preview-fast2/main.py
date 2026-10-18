@@ -416,6 +416,11 @@ question_start_time=0
 question_paused=False
 question_pause_started=0
 pause_button=Button(25,25,145,48,"Pause")
+answer_feedback=None
+answer_feedback_deadline=0
+answer_feedback_elapsed=0
+answer_selected_index=-1
+ANSWER_FEEDBACK_MS=2000
 QUESTION_TIME_LIMIT=10
 attack_cooldowns={"Swing":0,"Spin":0,"Smash":0,"Headbutt":0,"Heal":0}
 def draw_text(text,x,y,color=WHITE,size="normal"):
@@ -509,11 +514,11 @@ def draw_question():
     draw_text("KNOWLEDGE TRIAL",235,40,PURPLE,"large")
     draw_text(f"GRADE {selected_grade} MATH TRIAL",255,105,YELLOW,"small")
     draw_text(f"Attack: {selected_attack}",300,135,WHITE,"small")
-    elapsed=question_elapsed_ms()/1000
+    elapsed=(answer_feedback_elapsed if answer_feedback is not None else question_elapsed_ms())/1000
     remaining=max(0,QUESTION_TIME_LIMIT-elapsed)
     timer_color=RED if remaining<=3 else YELLOW
     draw_text(f"TIME: {remaining:.1f}",330,165,timer_color,"small")
-    if selected_grade==12:
+    if selected_grade==12 and not question_locked:
         pause_button.text="Resume" if question_paused else "Pause"
         pause_button.draw()
         if question_paused:
@@ -523,8 +528,21 @@ def draw_question():
     for i,button in enumerate(answer_buttons):
         button.text=question_choices[i]
         button.draw()
+        if answer_feedback is not None:
+            if i==question_answer:
+                pygame.draw.rect(screen,GREEN,button.rect,6)
+            elif i==answer_selected_index:
+                pygame.draw.rect(screen,RED,button.rect,6)
     if question_message:
-        draw_text(question_message,180,540,YELLOW,"small")
+        feedback_font=small_font
+        surface=feedback_font.render(question_message,True,YELLOW)
+        if surface.get_width()>740:
+            feedback_font=pygame.font.Font(None,max(16,int(30*740/surface.get_width())))
+            surface=feedback_font.render(question_message,True,YELLOW)
+        screen.blit(surface,surface.get_rect(center=(400,550)))
+    if answer_feedback is not None:
+        outcome="Time's up" if answer_feedback[1] else ("Correct!" if answer_selected_index==question_answer else "Incorrect")
+        draw_text(outcome+" — continuing in 2 seconds",100,310,YELLOW,"small")
 def draw_levelup():
     screen.fill(BLACK)
     draw_text("LEVEL UP!",280,50,YELLOW,"large")
@@ -577,7 +595,7 @@ def get_question_difficulty(attack):
     if attack=="Smash":
         return "very_hard"
 def create_question(subject,attack):
-    global question,question_choices,question_answer,question_subject,question_message,question_locked,question_start_time,question_paused,question_pause_started
+    global question,question_choices,question_answer,question_subject,question_message,question_locked,question_start_time,question_paused,question_pause_started,answer_feedback
     question_subject=subject
     difficulty=get_question_difficulty(attack)
     question,choices,correct_index=random.choice(get_questions(difficulty,subject))
@@ -587,6 +605,7 @@ def create_question(subject,attack):
     question_answer=question_choices.index(correct_answer)
     question_message=""
     question_locked=False
+    answer_feedback=None
     question_paused=False
     question_pause_started=0
     question_start_time=pygame.time.get_ticks()
@@ -631,10 +650,31 @@ def toggle_question_pause():
 def question_time_expired():
     return not question_paused and question_elapsed_ms()>=QUESTION_TIME_LIMIT*1000
 def answer_question(index):
+    global question_locked,question_message,answer_feedback,answer_feedback_deadline,answer_feedback_elapsed,answer_selected_index
+    if question_locked or question_paused or game_state!="QUESTION":
+        return
+    timed_out=question_time_expired()
+    answer_feedback_elapsed=question_elapsed_ms()
+    answer_selected_index=index
+    answer_feedback=(index,timed_out)
+    answer_feedback_deadline=pygame.time.get_ticks()+ANSWER_FEEDBACK_MS
+    question_message=f"Correct answer: {question_choices[question_answer]}"
+    question_locked=True
+
+def update_answer_feedback():
+    global answer_feedback,question_locked
+    if answer_feedback is None or pygame.time.get_ticks()<answer_feedback_deadline:
+        return
+    index,timed_out=answer_feedback
+    answer_feedback=None
+    question_locked=False
+    resolve_question(index,timed_out)
+
+def resolve_question(index,timed_out):
     global question_message,question_locked,game_state,message
     if question_locked or question_paused:
         return
-    if question_time_expired():
+    if timed_out:
         question_locked=True
         player.wrong+=1
         player.mastery[question_subject]=max(0,player.mastery[question_subject]-1)
@@ -866,6 +906,7 @@ async def main():
                     restart_game()
         if game_state=="QUESTION" and not question_locked and question_time_expired():
             answer_question(-1)
+        update_answer_feedback()
         update_music_transition()
         update_encounter_transition()
         if game_state=="TITLE":
