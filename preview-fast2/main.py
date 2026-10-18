@@ -5,6 +5,11 @@ import random
 import os
 from fractions import Fraction
 pygame.init()
+WEB_MUSIC = None
+if sys.platform == "emscripten":
+    import platform
+    WEB_MUSIC = platform.window.trollAudio
+
 # iOS may not expose audio until the first user interaction.
 try:
     if not pygame.mixer.get_init():
@@ -26,6 +31,9 @@ MUSIC_VOLUME=0.5
 MUSIC_FADE_MS=1200
 def play_enemy_music(enemy_number):
     global current_music,music_transition
+    if WEB_MUSIC is not None:
+        WEB_MUSIC.play(enemy_number)
+        return
     if not AUDIO_AVAILABLE:
         return
     filename=f"music/{enemy_number+1}.ogg"
@@ -82,6 +90,8 @@ def update_music_transition():
             music_transition=None
 def stop_music():
     global current_music,music_transition
+    if WEB_MUSIC is not None:
+        WEB_MUSIC.stop()
     if music_channel is not None:
         music_channel.stop()
     current_music=None
@@ -655,6 +665,8 @@ def next_enemy():
         global game_state
         game_state="GAMEOVER"
         return
+    if WEB_MUSIC is not None:
+        WEB_MUSIC.fadeOut()
     # Fade the current soundtrack and the current screen to black together.
     encounter_transition={"phase":"out","start_time":pygame.time.get_ticks()}
 def load_next_enemy():

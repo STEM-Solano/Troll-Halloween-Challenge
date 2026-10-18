@@ -1,18 +1,19 @@
 <!doctype html>
 <html lang="en-us"><head>
+<script src="audio-diagnostics.js"></script>
 <link rel="preconnect" href="https://pygame-web.github.io" crossorigin>
-<link rel="preload" href="trials-and-trolls-math-v1.3-fast2.tar.gz" as="fetch" crossorigin="anonymous">
+<link rel="preload" href="trials-and-trolls-audio1.tar.gz" as="fetch" crossorigin="anonymous">
 <script src="https://pygame-web.github.io/cdn/0.9.3/pythons.js" type=module id="site" data-python="python3.12" data-LINES=42 data-COLUMNS=132 data-os="vtx,snd,gui" async defer>#<!--
 
 print("""
-Loading trials-and-trolls-math-v1.3-fast2 from trials-and-trolls-math-v1.3-fast2.apk
+Loading trials-and-trolls-audio1 from trials-and-trolls-audio1.apk
     Pygbag Version : 0.9.3
     Template Version : 0.9.3
     Python  : 3.12
     CDN URL : https://pygame-web.github.io/cdn/0.9.3/
     Screen  : 1280x720
-    Title   : trials-and-trolls-math-v1.3-fast2
-    Folder  : trials-and-trolls-math-v1.3-fast2
+    Title   : trials-and-trolls-audio1
+    Folder  : trials-and-trolls-audio1
     Authors : pgw
     SPDX-License-Identifier: cookiecutter.spdx
 
@@ -27,16 +28,17 @@ from pathlib import Path
 # do not rename
 async def custom_site():
     import embed
+    platform.window.trollDiag.mark("engine", "Python engine ready")
     platform.document.body.style.background = "#7f7f7f"
 
     platform.window.transfer.hidden = true
     platform.window.canvas.style.visibility = "visible"
 
 
-    bundle = "trials-and-trolls-math-v1.3-fast2"
+    bundle = "trials-and-trolls-audio1"
 
     # the C or js loader could do that but be explicit.
-    appdir = Path(f"/data/data/{bundle}") # /data/data/trials-and-trolls-math-v1.3-fast2
+    appdir = Path(f"/data/data/{bundle}") # /data/data/trials-and-trolls-audio1
     appdir.mkdir()
 
 
@@ -45,16 +47,17 @@ async def custom_site():
     # unpack filesystem from compressed archive into work dir
     if platform.window.location.host.find('.itch.zone')>0:
         import zipfile
-        async with platform.fopen("trials-and-trolls-math-v1.3-fast2.apk", "rb") as archive:
+        async with platform.fopen("trials-and-trolls-audio1.apk", "rb") as archive:
             with zipfile.ZipFile(archive) as zip_ref:
                 zip_ref.extractall(appdir.as_posix())
     else:
         import tarfile
-        async with platform.fopen("trials-and-trolls-math-v1.3-fast2.tar.gz", "rb") as archive:
+        async with platform.fopen("trials-and-trolls-audio1.tar.gz", "rb") as archive:
             tar = tarfile.open(fileobj=archive, mode="r:gz")
             tar.extractall(path=appdir.as_posix(), filter='tar')
             tar.close()
 
+    platform.window.trollDiag.mark("assets", "Assets unpacked")
     platform.window.infobox.innerText = "Preparing game…"
 
     # preloader will change to work dir and prepend it to sys.path
@@ -65,6 +68,7 @@ async def custom_site():
     while embed.counter()<0:
         await asyncio.sleep(.1)
 
+    platform.window.trollDiag.mark("modules", "Pygame modules ready")
     main = appdir / "assets" / "main.py"
 
     # TODO: test for window.webkitAudioContext and block aio loop until gesture if accessing media manager play
@@ -101,6 +105,7 @@ async def custom_site():
     # if you don't reach that step
     # your main.py has an infinite sync loop somewhere !
 
+    platform.window.trollDiag.mark("game", "Game started")
     platform.window.infobox.style.display = "none"
     platform.window.config.gui_divider = 1
     platform.window.window_resize()
@@ -159,7 +164,7 @@ config = {
     gui_divider : 2,
     ume_block : 0,
     can_close : 0,
-    archive : "trials-and-trolls-math-v1.3-fast2",
+    archive : "trials-and-trolls-audio1",
     gui_debug : 2,
     cdn : "https://pygame-web.github.io/cdn/0.9.3/",
     autorun : 0,
@@ -186,7 +191,7 @@ function show_infobox() {
 
 </script>
 
-    <title>trials-and-trolls-math-v1.3-fast2</title>
+    <title>trials-and-trolls-audio1</title>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -397,12 +402,6 @@ frameborder="1"
         box.hidden =  debug_hidden
 
         show_infobox()
-    }
-
-    if ('serviceWorker' in navigator && location.protocol === 'https:') {
-        navigator.serviceWorker.register('./sw.js').catch(error => {
-            console.warn('Offline cache unavailable; normal loading continues.', error);
-        });
     }
 
     function custom_prerun(){
